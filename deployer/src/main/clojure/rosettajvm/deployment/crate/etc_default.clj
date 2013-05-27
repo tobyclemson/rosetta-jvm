@@ -1,6 +1,5 @@
 (ns rosettajvm.deployment.crate.etc-default
   (:require [environ.core :as environ]
-            [pallet.configure :as configure]
             [pallet.api :as api]
             [pallet.crate :as crate]
             [pallet.actions :as actions]

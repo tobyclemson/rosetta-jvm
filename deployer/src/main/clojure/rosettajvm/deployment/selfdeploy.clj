@@ -4,6 +4,7 @@
             [pallet.configure :as configure])
   (:use [pallet.crate.automated-admin-user :only [with-automated-admin-user]]
         [rosettajvm.deployment.crate.etc-default :only [with-etc-default]]
+        [rosettajvm.deployment.crate.elastic-ip :only [with-ip-reassignment]]
         [rosettajvm.deployment.crate.openjdk-7-jre :only [with-openjdk-7-jre]]
         [rosettajvm.deployment.crate.deployer :only [with-deployer-for]])
   (:gen-class :name "rosettajvm.deployment.SelfDeploy"))
@@ -25,7 +26,8 @@
     with-automated-admin-user
     with-openjdk-7-jre
     (with-deployer-for commit-sha)
-    with-etc-default))
+    with-etc-default
+    (with-ip-reassignment "rosetta-jvm-deployer")))
 
 (defn compute-provider []
   (pallet.compute/instantiate-provider
@@ -37,14 +39,14 @@
   (deref (api/converge
            (merge (deployer-group-for commit-sha) {:count 1})
            :compute (compute-provider)
-           :phase [:configure :install ]
+           :phase [:configure :install :finalise]
            :async true)))
 
 (defn bring-node-down []
   (deref (api/converge
            (merge (deployer-group) {:count 0})
            :compute (compute-provider)
-           :phase [:configure :install ]
+           :phase [:configure :install :finalise]
            :async true)))
 
 (defn -main [& args]
